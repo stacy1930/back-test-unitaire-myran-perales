@@ -9,6 +9,7 @@ from api.services import check_rick_and_morty_characters
 
 class ProductView(ListAPIView):
     serializer_class = ProductSerializer
+    queryset = Product.objects.all()  # to avoid bug, even though it shouldn't happen. Except with Stacy. Because she's too strong for us mere mortals
 
     def get(self, request, *args, **kwargs):
         # check_rick_and_morty_characters()
