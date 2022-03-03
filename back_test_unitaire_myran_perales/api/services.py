@@ -1,3 +1,5 @@
+import random
+
 from rest_framework import status
 
 from api import constants as c
@@ -16,13 +18,18 @@ def get_request_to_rick_and_morty_api(path):
 
 
 def check_character(character_info):
+    name = character_info["name"]
+    image = character_info["image"]
+    api_id = character_info["id"]
     try:
-        Product.objects.get(id=character_info["id"])
+        Product.objects.get(id=api_id)
     except Product.DoesNotExist:
-        Product.objects.create()
+        Product.objects.create(
+            name=name, image=image, rick_and_morty_id=api_id, quantity=20, price=round(random.uniform(8.0, 70.5), 2)
+        )
 
 
-def get_rick_and_morty_characters():
+def check_rick_and_morty_characters():
     path = c.RICK_AND_MORTY_ENDPOINT + c.RICK_AND_MORTY_CHARACTERS
     while path:
         api_response = get_request_to_rick_and_morty_api(path)

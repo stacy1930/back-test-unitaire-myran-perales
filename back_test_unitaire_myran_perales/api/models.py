@@ -14,3 +14,6 @@ class Product(models.Model):
 
 class Cart(models.Model):
     products = models.ManyToManyField(Product)
+
+    def __str__(self):
+        return f"Cart {self.id} (contains {self.products.count()} products)"
