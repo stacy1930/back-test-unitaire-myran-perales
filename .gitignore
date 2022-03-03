@@ -1,0 +1,5 @@
+docker-compose.yaml
+Dockerfile
+db_data
+__pycache__/
+.idea/
