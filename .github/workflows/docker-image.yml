@@ -17,7 +17,7 @@ jobs:
     - name: Build the Docker image
       run: |
         docker-compose up -d
-        docker exec -it back_test_unitaire_myran_perales /bin/bash
+        docker exec -it myran-perales-backend-container /bin/bash
         python3 manage.py makemigrations
         python3 manage.py migrate
         python3 manage.py test
