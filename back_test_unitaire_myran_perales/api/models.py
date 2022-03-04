@@ -13,7 +13,16 @@ class Product(models.Model):
 
 
 class Cart(models.Model):
-    products = models.ManyToManyField(Product)
+    products = models.ManyToManyField(Product, through="CartProduct")
 
     def __str__(self):
         return f"Cart {self.id} (contains {self.products.count()} products)"
+
+
+class CartProduct(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.quantity} {self.product.name}(s) in cart"

@@ -1,18 +1,20 @@
 from rest_framework import status
-from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, DestroyAPIView
 from rest_framework.response import Response
 
+from api import services
 from api.models import Product, Cart
 from api.serializers import ProductSerializer, CartSerializer
-from api.services import check_rick_and_morty_characters
 
 
 class ProductView(ListAPIView):
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()  # to avoid bug, even though it shouldn't happen. Except with Stacy. Because she's too strong for us mere mortals
+    queryset = Product.objects.all()
+    # to avoid bug, even though it shouldn't happen. Except with Stacy. Because she's too strong for us mere mortals
 
     def get(self, request, *args, **kwargs):
-        # check_rick_and_morty_characters()
+        # services.check_rick_and_morty_characters()
 
         products = Product.objects.all()
 
@@ -42,17 +44,42 @@ class ProductDetailView(RetrieveAPIView):
     lookup_url_kwarg = 'id'
 
 
-class CartView(ListCreateAPIView):
+class CartView(CreateAPIView, DestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
     def create(self, request, *args, **kwargs):
-        products = request.data.get("products")
-        for product_detail in products:
-            pass
+        product_id = request.data.get("product")
+        quantity = request.data.get("quantity")
 
+        try:
+            product = Product.objects.get(id=product_id)
+        except (Product.DoesNotExist, ValueError, TypeError):
+            raise ValidationError("product field missing or inconsistent")
 
-class CartDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
-    lookup_url_kwarg = 'id'
+        try:
+            quantity = int(quantity)
+        except (ValueError, TypeError):
+            raise ValidationError("quantity field missing or inconsistent")
+
+        cart = services.get_or_create_cart()
+        services.add_to_cart(cart, product, quantity)
+
+        data = self.get_serializer(cart).data
+        
+        return Response(data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        product_id = request.data.get("product")
+
+        try:
+            product = Product.objects.get(id=product_id)
+        except (Product.DoesNotExist, ValueError, TypeError):
+            raise ValidationError("product field missing or inconsistent")
+
+        cart = services.get_or_create_cart()
+        services.remove_from_cart(cart, product)
+
+        data = self.get_serializer(cart).data
+
+        return Response(data, status=status.HTTP_200_OK)
