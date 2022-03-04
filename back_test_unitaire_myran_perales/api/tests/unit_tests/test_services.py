@@ -1,10 +1,11 @@
 import unittest
 from unittest import mock
 
+from rest_framework.exceptions import ValidationError
 from rest_framework.test import APITestCase
 
 from api import services
-from api.models import Product
+from api.models import Product, Cart, CartProduct
 
 
 class TestServices(APITestCase):
@@ -84,6 +85,60 @@ class TestServices(APITestCase):
             self.assertEqual(new_product.image, "some img")
         except Product.DoesNotExist:
             self.fail("We should have a product with r&m id of 666. Not found in DB")
+
+    def test_get_or_create_cart(self):
+        self.assertEqual(Cart.objects.count(), 0)
+
+        services.get_or_create_cart()
+
+        self.assertEqual(Cart.objects.count(), 1)
+
+        created_cart = Cart.objects.first()
+        cart = services.get_or_create_cart()
+
+        self.assertEqual(Cart.objects.count(), 1)
+        self.assertEqual(created_cart, cart)
+
+    def test_add_to_cart(self):
+        product = Product.objects.create(name="Rick", image="img", price=10, quantity=10)
+        cart = Cart.objects.create()
+
+        with self.assertRaisesRegexp(ValidationError, "The asked quantity for this product is too high"):
+            services.add_to_cart(cart, product, 11)
+
+        self.assertFalse(CartProduct.objects.filter(cart=cart, product=product).exists())
+
+        services.add_to_cart(cart, product, 3)
+
+        try:
+            cart_product = CartProduct.objects.get(cart=cart, product=product)
+        except CartProduct.DoesNotExist:
+            self.fail("CartProduct linked to cart and product not found")
+        self.assertEqual(cart_product.quantity, 3)
+
+        self.assertEqual(product.quantity, 7)
+
+        services.add_to_cart(cart, product, 5)
+
+        cart_product.refresh_from_db()
+        product.refresh_from_db()
+
+        self.assertEqual(cart_product.quantity, 8)
+        self.assertEqual(product.quantity, 2)
+
+    def test_remove_from_cart(self):
+        cart = Cart.objects.create()
+        product_1 = Product.objects.create(name="Rick", image="img", price=10, quantity=10)
+        product_2 = Product.objects.create(name="Morty", image="img", price=15, quantity=15)
+        CartProduct.objects.create(cart=cart, product=product_1, quantity=3)
+
+        with self.assertRaisesRegexp(ValidationError, "This product was not in the cart"):
+            services.remove_from_cart(cart, product_2)
+
+        services.remove_from_cart(cart, product_1)
+
+        self.assertFalse(CartProduct.objects.filter(cart=cart, product=product_1).exists())
+        self.assertEqual(product_1.quantity, 13)
 
 
 if __name__ == "__main__":

@@ -22,5 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/products', ProductView.as_view(), name="products"),
     path('api/products/<int:id>', ProductDetailView.as_view(), name="products_detail"),
-    path('api/carts/', CartView.as_view(), name="carts"),
+    path('api/cart', CartView.as_view(), name="cart"),
 ]

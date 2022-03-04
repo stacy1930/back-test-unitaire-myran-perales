@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView, RetrieveDestroyAPIView
 from rest_framework.response import Response
 
 from api import services
@@ -14,7 +14,7 @@ class ProductView(ListAPIView):
     # to avoid bug, even though it shouldn't happen. Except with Stacy. Because she's too strong for us mere mortals
 
     def get(self, request, *args, **kwargs):
-        # services.check_rick_and_morty_characters()
+        services.check_rick_and_morty_characters()
 
         products = Product.objects.all()
 
@@ -44,7 +44,7 @@ class ProductDetailView(RetrieveAPIView):
     lookup_url_kwarg = 'id'
 
 
-class CartView(CreateAPIView, DestroyAPIView):
+class CartView(CreateAPIView, RetrieveDestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
@@ -67,6 +67,11 @@ class CartView(CreateAPIView, DestroyAPIView):
 
         data = self.get_serializer(cart).data
         
+        return Response(data, status=status.HTTP_200_OK)
+
+    def get(self, request, *args, **kwargs):
+        cart = services.get_or_create_cart()
+        data = self.get_serializer(cart).data
         return Response(data, status=status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
