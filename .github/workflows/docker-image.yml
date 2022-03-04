@@ -19,7 +19,7 @@ jobs:
         docker-compose up -d
     - name: run tests
       run: |
-        docker-compose exec -T myran-perales-backend-container /bin/bash
+        docker-compose exec -T myran-perales-backend-container bash
         python3 manage.py makemigrations
         python3 manage.py migrate
         python3 manage.py test
