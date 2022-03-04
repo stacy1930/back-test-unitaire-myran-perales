@@ -48,7 +48,7 @@ class CartView(CreateAPIView, RetrieveDestroyAPIView):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
-    def create(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         product_id = request.data.get("product")
         quantity = request.data.get("quantity")
 
@@ -59,6 +59,8 @@ class CartView(CreateAPIView, RetrieveDestroyAPIView):
 
         try:
             quantity = int(quantity)
+            if quantity <= 0:
+                raise ValueError
         except (ValueError, TypeError):
             raise ValidationError("quantity field missing or inconsistent")
 

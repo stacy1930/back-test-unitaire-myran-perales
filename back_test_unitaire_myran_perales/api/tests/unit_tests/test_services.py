@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, APIException
 from rest_framework.test import APITestCase
 
 from api import services
@@ -9,6 +9,19 @@ from api.models import Product, Cart, CartProduct
 
 
 class TestServices(APITestCase):
+    @mock.patch("api.services.requests.get")
+    def test_get_request_to_rick_and_morty_api(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = {"results": "Yes"}
+
+        response = services.get_request_to_rick_and_morty_api("the path")
+
+        mock_get.assert_called_with("the path")
+        self.assertEqual(response, {"results": "Yes"})
+
+        mock_get.return_value.status_code = 500
+        with self.assertRaisesRegexp(APIException, "Rick and Morty API responded with status 500"):
+            services.get_request_to_rick_and_morty_api("the path")
 
     @mock.patch("api.services.get_request_to_rick_and_morty_api")
     @mock.patch("api.services.check_character")

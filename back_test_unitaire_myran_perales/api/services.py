@@ -1,7 +1,7 @@
 import random
 
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, APIException
 
 from api import constants as c
 
@@ -13,7 +13,7 @@ from api.models import Product, Cart, CartProduct
 def get_request_to_rick_and_morty_api(path):
     r = requests.get(path)
     if r.status_code != status.HTTP_200_OK:
-        raise  # figure out which exception to raise
+        raise APIException(f"Rick and Morty API responded with status {r.status_code}")  # figure out which exception to raise
     result = r.json()
     return result
 
