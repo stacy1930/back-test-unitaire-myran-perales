@@ -1,3 +1,5 @@
+[![Tests](https://github.com/stacy1930/back-test-unitaire-myran-perales/actions/workflows/docker-image.yml/badge.svg)](https://github.com/stacy1930/back-test-unitaire-myran-perales/actions/workflows/docker-image.yml)
+
 # back-test-unitaire-myran-perales
 
 Lancer le projet : docker-compose up  
