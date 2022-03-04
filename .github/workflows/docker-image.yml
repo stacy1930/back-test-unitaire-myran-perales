@@ -17,11 +17,9 @@ jobs:
     - name: Build the Docker image
       run: |
         docker-compose up -d
-#     - name: create migrations
-#       run: docker-compose exec -T myran-perales-backend-container python3 manage.py makemigrations
-#     - name: run migrations
-#       run: docker-compose exec -T myran-perales-backend-container python3 manage.py migrate
-    - name: check
-      run: docker-compose exec -T myran-perales-backend-container ls
+    - name: create migrations
+      run: docker-compose exec -T backend python3 manage.py makemigrations
+    - name: run migrations
+      run: docker-compose exec -T backend python3 manage.py migrate
     - name: run tests
-      run: docker-compose exec -T myran-perales-backend-container python3 manage.py test
+      run: docker-compose exec -T backend python3 manage.py test
