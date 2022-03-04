@@ -1,3 +1,4 @@
+import functools
 import random
 
 from rest_framework import status
@@ -30,6 +31,7 @@ def check_character(character_info):
         )
 
 
+@functools.lru_cache(maxsize=None)
 def check_rick_and_morty_characters():
     path = c.RICK_AND_MORTY_ENDPOINT + c.RICK_AND_MORTY_CHARACTERS
     while path:
